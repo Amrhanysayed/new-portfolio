@@ -52,6 +52,7 @@ export default function Navigation() {
               { label: "Experience", id: "experience" },
               { label: "Projects", id: "projects" },
               { label: "Skills", id: "skills" },
+              { label: "Terminal", id: "terminal" },
               { label: "Contact", id: "contact" },
             ].map((item, index) => (
               <motion.button
@@ -116,6 +117,7 @@ export default function Navigation() {
                 { label: "Experience", id: "experience" },
                 { label: "Projects", id: "projects" },
                 { label: "Skills", id: "skills" },
+                { label: "Terminal", id: "terminal" },
                 { label: "Contact", id: "contact" },
               ].map((item, index) => (
                 <motion.button
