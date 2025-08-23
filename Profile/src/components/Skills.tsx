@@ -117,8 +117,8 @@ export default function Skills() {
               )} backdrop-blur-sm`}
               initial={{ opacity: 0, y: 50 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-              transition={{ duration: 0.6, delay: 0.6 + index * 0.2 }}
-              whileHover={{ y: -8, scale: 1.03, rotateY: 2 }}
+              transition={{ duration: 0.2, delay: 0 }}
+              whileHover={{ y: -8, scale: 1.03 }}
             >
               <motion.h3
                 className="text-xl font-bold text-gray-900 mb-4 text-center"
@@ -146,9 +146,9 @@ export default function Skills() {
                       delay: 0.8 + index * 0.2 + skillIndex * 0.1,
                     }}
                     whileHover={{
-                      scale: 1.15,
-                      rotateZ: 2,
+                      scale: 1.05,
                       boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                      transition: { duration: 0.2 },
                     }}
                     whileTap={{ scale: 0.95 }}
                   >
