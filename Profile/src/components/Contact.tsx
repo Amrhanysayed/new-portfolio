@@ -2,12 +2,66 @@
 
 import { portfolioData } from "@/data/portfolio";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 export default function Contact() {
   const { contact } = portfolioData;
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.1 });
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: "" });
+
+    try {
+      // Option 1: Direct mailto (simpler but less professional)
+      const subject = encodeURIComponent(
+        formData.subject || "Portfolio Contact"
+      );
+      const body = encodeURIComponent(
+        `Hi Amr,\n\nName: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}\n\nBest regards,\n${formData.name}`
+      );
+
+      // Open mailto link
+      window.location.href = `mailto:${contact.email}?subject=${subject}&body=${body}`;
+
+      setSubmitStatus({
+        type: "success",
+        message:
+          "Email client opened! Please send the email from your default email app.",
+      });
+
+      // Reset form
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (error) {
+      setSubmitStatus({
+        type: "error",
+        message: "Something went wrong. Please try emailing me directly.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <section
@@ -177,18 +231,36 @@ export default function Contact() {
               Send a Message
             </h3>
 
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Status Message */}
+              {submitStatus.type && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`p-4 rounded-lg border ${
+                    submitStatus.type === "success"
+                      ? "bg-green-50 border-green-200 text-green-800"
+                      : "bg-red-50 border-red-200 text-red-800"
+                  }`}
+                >
+                  {submitStatus.message}
+                </motion.div>
+              )}
+
               <div>
                 <label
                   htmlFor="name"
                   className="block text-sm font-medium text-violet mb-2"
                 >
-                  Name
+                  Name *
                 </label>
                 <input
                   type="text"
                   id="name"
                   name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
                   className="w-full px-4 py-3 rounded-lg border border-rose-quartz/30 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-dark-magenta/50 focus:border-dark-magenta transition-all duration-200 hover:border-rose-quartz/50"
                   placeholder="Your Name"
                 />
@@ -199,12 +271,15 @@ export default function Contact() {
                   htmlFor="email"
                   className="block text-sm font-medium text-violet mb-2"
                 >
-                  Email
+                  Email *
                 </label>
                 <input
                   type="email"
                   id="email"
                   name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
                   className="w-full px-4 py-3 rounded-lg border border-rose-quartz/30 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-dark-magenta/50 focus:border-dark-magenta transition-all duration-200 hover:border-rose-quartz/50"
                   placeholder="your.email@example.com"
                 />
@@ -221,6 +296,8 @@ export default function Contact() {
                   type="text"
                   id="subject"
                   name="subject"
+                  value={formData.subject}
+                  onChange={handleInputChange}
                   className="w-full px-4 py-3 rounded-lg border border-rose-quartz/30 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-dark-magenta/50 focus:border-dark-magenta transition-all duration-200 hover:border-rose-quartz/50"
                   placeholder="Project Inquiry"
                 />
@@ -231,12 +308,15 @@ export default function Contact() {
                   htmlFor="message"
                   className="block text-sm font-medium text-violet mb-2"
                 >
-                  Message
+                  Message *
                 </label>
                 <textarea
                   id="message"
                   name="message"
                   rows={5}
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  required
                   className="w-full px-4 py-3 rounded-lg border border-rose-quartz/30 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-dark-magenta/50 focus:border-dark-magenta transition-all duration-200 hover:border-rose-quartz/50 resize-none"
                   placeholder="Tell me about your project or just say hi!"
                 ></textarea>
@@ -244,10 +324,45 @@ export default function Contact() {
 
               <button
                 type="submit"
-                className="w-full bg-dark-magenta hover:bg-violet text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-dark-magenta/50 focus:scale-105"
+                disabled={isSubmitting}
+                className={`w-full font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform focus:outline-none focus:ring-2 focus:ring-dark-magenta/50 ${
+                  isSubmitting
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-dark-magenta hover:bg-violet text-white hover:scale-105 hover:shadow-lg focus:scale-105"
+                }`}
               >
-                Send Message
+                {isSubmitting ? "Opening Email Client..." : "Send Message"}
               </button>
+
+              <p className="text-sm text-gray-500 text-center">
+                This will open your default email client with the message
+                pre-filled
+              </p>
+
+              <div className="text-center pt-4 border-t border-rose-quartz/20">
+                <p className="text-sm text-gray-600 mb-3">
+                  Prefer direct contact?
+                </p>
+                <a
+                  href={`mailto:${contact.email}`}
+                  className="inline-flex items-center space-x-2 text-dark-magenta hover:text-violet transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span>Email me directly</span>
+                </a>
+              </div>
             </form>
           </div>
         </div>
@@ -255,8 +370,9 @@ export default function Contact() {
         {/* Footer */}
         <div className="mt-20 pt-8 border-t border-rose-quartz/20 text-center">
           <p className="text-gray-600">
-            © 2025 Amr Hany. Built with Next.js and Tailwind CSS.
+            © 2025 Amr Hany Computer Engineering Student
           </p>
+          <p className="text-gray-500 text-sm mt-2 italic">وهنا تنتهي سهرتنا</p>
         </div>
       </div>
     </section>
